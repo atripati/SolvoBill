@@ -1,141 +1,80 @@
-"use client";
+"use client"; // Add this line
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { auth } from "@/firebase";
-import { motion } from "framer-motion";
-import { LockClosedIcon, EnvelopeIcon } from "@heroicons/react/24/outline";
+import { useState } from "react";
+import Link from "next/link";
+import Head from "next/head";
 
-export default function AuthPage() {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+export default function Home() {
+  const [selectedUniversity, setSelectedUniversity] = useState("");
 
-  // 🔹 Check if the user is already logged in and redirect them to the dashboard
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        router.push("/dashboard"); // ✅ Redirect to dashboard if already logged in
-      }
-    });
-    return () => unsubscribe();
-  }, [router]);
-
-  // 🔹 Handle Login with Email & Password
-  const handleLogin = async () => {
-    router.push("/dashboard");
-    setError("");
-    if (!email || !password) {
-      setError("Please enter both email and password.");
-      return;
-    }
-    setLoading(true);
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      router.push("/dashboard"); // ✅ Redirect after successful login
-    } catch (err) {
-      setError("Invalid email or password. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 🔹 Handle Login with Google
-  const handleGoogleLogin = async () => {
-    setError("");
-    const provider = new GoogleAuthProvider();
-    try {
-      await signInWithPopup(auth, provider);
-      router.push("/dashboard"); // ✅ Redirect after Google login
-    } catch (err) {
-      setError("Google login failed. Please try again.");
-    }
-  };
+  const universities = [
+    "Harvard University",
+    "Stanford University",
+    "MIT",
+    "Yale University",
+    "Princeton University",
+    "University of Chicago",
+    "Columbia University",
+    "New York University",
+    "University of California, Berkeley",
+    "University of Michigan",
+    "DePaul University",
+  ];
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-black text-white">
-      <motion.div
-        className="w-full max-w-md p-8 bg-white/10 backdrop-blur-lg rounded-2xl shadow-lg"
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.6 }}
-      >
-        {/* Logo & Branding */}
-        <div className="text-center">
-          <h1 className="text-3xl font-extrabold">SolvoBill</h1>
-          <p className="text-gray-300 text-sm mt-2">Take Control of Your Tuition Costs</p>
-        </div>
+    <>
+      <Head>
+        <title>SolvoBill - Reduce Your Tuition Costs</title>
+        <meta
+          name="description"
+          content="Take control of your tuition costs with SolvoBill. Join today and start saving on your education expenses!"
+        />
+      </Head>
 
-        {/* Error Message */}
-        {error && <p className="text-red-500 text-sm mt-4 text-center">{error}</p>}
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-500 to-purple-700 text-white">
+        <header className="w-full py-6 text-center text-4xl font-extrabold bg-white text-blue-700 shadow-md">
+          🎓 SolvoBill - Take Control of Your Tuition Costs 🎓
+        </header>
 
-        {/* Login Form */}
-        <div className="mt-6 space-y-4">
-          {/* Email Input */}
-          <div className="relative">
-            <EnvelopeIcon className="w-5 h-5 absolute left-3 top-3 text-gray-400" />
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="w-full p-3 pl-10 bg-black/30 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
+        <main className="flex flex-col items-center justify-center flex-1 px-6 text-center">
+          <h1 className="text-5xl font-bold leading-tight drop-shadow-lg">
+            Reduce Your Tuition Costs – Your Way!
+          </h1>
+          <p className="text-lg mt-4 max-w-2xl opacity-90">
+            SolvoBill helps students across the U.S. control and reduce their tuition costs. 
+            Select your university and get started!
+          </p>
 
-          {/* Password Input */}
-          <div className="relative">
-            <LockClosedIcon className="w-5 h-5 absolute left-3 top-3 text-gray-400" />
-            <input
-              type="password"
-              placeholder="Enter your password"
-              className="w-full p-3 pl-10 bg-black/30 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-
-          {/* Login Button */}
-          <motion.button
-            className={`w-full p-3 rounded-lg shadow-md font-semibold transition-all duration-300 ${
-              loading ? "bg-gray-600" : "bg-blue-600 hover:bg-blue-700"
-            }`}
-            whileHover={{ scale: 1.05 }}
-            onClick={handleLogin}
-            disabled={loading}
+          {/* University Selection Dropdown */}
+          <select
+            className="mt-6 p-3 text-black rounded-lg shadow-md bg-white"
+            value={selectedUniversity}
+            onChange={(e) => setSelectedUniversity(e.target.value)}
           >
-            {loading ? "Logging in..." : "🚀 Login"}
-          </motion.button>
-        </div>
+            <option value="">Select Your University</option>
+            {universities.map((uni) => (
+              <option key={uni} value={uni}>
+                {uni}
+              </option>
+            ))}
+          </select>
 
-        {/* Divider */}
-        <div className="flex items-center my-4">
-          <div className="flex-1 h-px bg-gray-600"></div>
-          <p className="text-gray-400 text-sm mx-4">or</p>
-          <div className="flex-1 h-px bg-gray-600"></div>
-        </div>
+          {/* Redirects user to Login/Register if university is selected */}
+          <Link href={selectedUniversity ? `/auth?university=${selectedUniversity}` : "#"} legacyBehavior>
+            <a
+              className={`mt-6 px-8 py-3 font-semibold rounded-full shadow-lg transition duration-300 text-xl ${
+                selectedUniversity ? "bg-yellow-400 text-black hover:bg-yellow-500" : "bg-gray-400 text-gray-700 cursor-not-allowed"
+              }`}
+            >
+              🚀 Get Started Now
+            </a>
+          </Link>
+        </main>
 
-        {/* Google Login */}
-        <motion.button
-          className="w-full bg-white text-black flex items-center justify-center p-3 rounded-lg shadow-md hover:bg-gray-200 transition-all duration-300"
-          whileHover={{ scale: 1.05 }}
-          onClick={handleGoogleLogin}
-        >
-          <img src="https://img.icons8.com/color/48/000000/google-logo.png" alt="Google Logo" className="w-5 h-5 mr-2" />
-          Sign in with Google
-        </motion.button>
-
-        {/* Register Link */}
-        <p className="text-gray-400 text-sm text-center mt-4">
-          New to SolvoBill?{" "}
-          <span className="text-blue-500 cursor-pointer hover:underline" onClick={() => router.push("/register")}>
-            Create an account
-          </span>
-        </p>
-      </motion.div>
-    </div>
+        <footer className="w-full bg-gray-900 py-4 text-center text-white text-sm opacity-75">
+          © 2025 SolvoBill. All Rights Reserved.
+        </footer>
+      </div>
+    </>
   );
 }
